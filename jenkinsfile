@@ -2,10 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'spefinal'
-        KUBE_CONTEXT = 'minikube'
-        KUBE_NAMESPACE = 'default'
-        DEPLOYMENT_NAME = 'your-deployment'
+        DOCKER_IMAGE = 'drishti979/spefinal' // Ensure this is correct
+        ANSIBLE_PLAYBOOK = 'deploy_to_minikube.yml'
     }
 
     stages {
@@ -15,31 +13,32 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Setup Ansible Environment') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}")
+                    // Ensure Ansible is installed and available in the Jenkins environment
+                    sh 'ansible --version'
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Pull Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        docker.image("${DOCKER_IMAGE}").push()
-                    }
+                    // Pull the Docker image using Docker commands
+                    sh "docker pull ${DOCKER_IMAGE}"
                 }
             }
         }
 
-        stage('Deploy to Minikube') {
+        stage('Run Ansible Playbook') {
             steps {
                 script {
-                    kubernetesDeploy(
-                        configs: 'k8s/deployment.yaml',
-                        kubeconfigId: 'minikube-kubeconfig'
-                    )
+                    // Ensure Minikube is running
+                    sh 'minikube status || minikube start'
+
+                    // Run the Ansible playbook
+                    sh "ansible-playbook -i localhost, ${ANSIBLE_PLAYBOOK}"
                 }
             }
         }
@@ -47,8 +46,8 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 script {
-                    sh 'kubectl get pods -n ${KUBE_NAMESPACE}'
-                    sh 'kubectl get services -n ${KUBE_NAMESPACE}'
+                    // Verify the deployment in Minikube
+                    sh 'kubectl get pods,services -o wide'
                 }
             }
         }
