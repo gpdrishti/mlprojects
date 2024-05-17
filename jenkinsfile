@@ -4,12 +4,13 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'drishti979/spefinal' // Ensure this is correct
         ANSIBLE_PLAYBOOK = 'deploy_to_minikube.yml'
+        INVENTORY_FILE = 'inventory' // Path to your inventory file
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/gpdrishti/mlprojects'
+                git 'https://github.com/gpdrishti/mlprojects.git'
             }
         }
 
@@ -38,7 +39,7 @@ pipeline {
                     sh 'minikube status || minikube start'
 
                     // Run the Ansible playbook
-                    sh "ansible-playbook -i localhost, ${ANSIBLE_PLAYBOOK}"
+                    sh "ansible-playbook -i ${INVENTORY_FILE} ${ANSIBLE_PLAYBOOK}"
                 }
             }
         }
