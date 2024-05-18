@@ -1,35 +1,6 @@
 
----
-- name: Pull Docker Image from Docker Hub and Deploy on Minikube
-  hosts: localhost
-  become: false
-
-  tasks:
-    - name: Pull Docker Image
-      docker_image:
-        name: "drishti979/spefinal"
-        source: pull
-      register: docker_pull_result
-
-    - name: Display Docker Pull Result
-      debug:
-        var: docker_pull_result
-
-    - name: Start Docker service
-      service:
-        name: docker
-        state: started
-
-    - name: Ensure Minikube is running
-      shell: minikube status || minikube start
-
-    - name: Deploy to Minikube
-      shell: kubectl apply -f deployment.yaml
-
-    - name: Verify deployment
-      shell: kubectl get pods,services -o wide
-      register: kubectl_output
-
-    - name: Display deployment status
-      debug:
-        var: kubectl_output.stdout_lines
+name: Deploy to minikube
+hosts: localhost
+tasks: 
+  - name: apply backend
+    shell: kubectl apply -f ../kubernetes-config/deployment.yaml
