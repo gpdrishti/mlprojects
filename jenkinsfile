@@ -5,6 +5,7 @@ pipeline {
         DOCKER_IMAGE = 'drishti979/spefinal' // Ensure this is correct
         ANSIBLE_PLAYBOOK = 'deploy_to_minikube.yml'
         INVENTORY_FILE = 'inventory' // Path to your inventory file
+        DOCKER_TAG = 'latest' // You can change this to another tag if needed
     }
 
     stages {
@@ -23,11 +24,29 @@ pipeline {
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image from the Dockerfile in the repository
+                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Push the Docker image to the repository
+                    sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                }
+            }
+        }
+
         stage('Pull Docker Image') {
             steps {
                 script {
                     // Pull the Docker image using Docker commands
-                    sh "docker pull ${DOCKER_IMAGE}"
+                    sh "docker pull ${DOCKER_IMAGE}:${DOCKER_TAG}"
                 }
             }
         }
