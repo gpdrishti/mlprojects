@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'spefinal' // Ensure this is correct
+        DOCKER_IMAGE = 'drishti979/spefinal' // Ensure this is correct
         ANSIBLE_PLAYBOOK = 'deploy_to_minikube.yml'
         INVENTORY_FILE = 'inventory' // Path to your inventory file
         DOCKER_TAG = 'latest' // You can change this to another tag if needed
