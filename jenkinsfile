@@ -55,6 +55,10 @@ pipeline {
         stage('Run Ansible Playbook') {
             steps {
                 script {
+                    // Ensure Minikube permissions are correct
+                    sh 'sudo chown -R $USER $HOME/.minikube'
+                    sh 'chmod -R u+wrx $HOME/.minikube'
+
                     // Ensure Minikube is running
                     sh 'minikube status || minikube start'
 
