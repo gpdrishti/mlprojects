@@ -60,7 +60,7 @@ pipeline {
                     sh 'sudo chmod -R u+wrx /home/drishti/.minikube'
 
                     // Ensure Minikube is running
-                    sh 'minikube status || minikube start'
+                    sh 'minikube delete && minikube start'
 
                     // Run the Ansible playbook
                     sh "ansible-playbook -i ${INVENTORY_FILE} ${ANSIBLE_PLAYBOOK}"
