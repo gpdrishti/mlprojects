@@ -56,8 +56,8 @@ pipeline {
             steps {
                 script {
                     // Ensure Minikube permissions are correct
-                    sh 'sudo chown -R $USER $HOME/.minikube'
-                    sh 'sudo chmod -R u+wrx $HOME/.minikube'
+                    sh 'sudo chown -R $USER /home/drishti/.minikube'
+                    sh 'sudo chmod -R u+wrx /home/drishti/.minikube'
 
                     // Ensure Minikube is running
                     sh 'minikube status || minikube start'
