@@ -1,27 +1,29 @@
 ---
-- name: Deploy to Minikube
+- name: Deploy  to minikube
   hosts: localhost
+  connection: local
+  become: true
+  vars:
+    ansible_python_interpreter: /var/lib/jenkins/workspace/prediction/venv/bin/python
+  collections:
+  collections:
+    - community.kubernetes
+
   tasks:
-    - name: Check if kubectl is installed
-      command: kubectl version --client
-      register: kubectl_installed
-      ignore_errors: yes
+  - name: Create minikube namespace
+    k8s:
+      state: present
+      kubeconfig: /home/drishti/.kube/config
+      definition:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: minikube
 
-    - name: Install kubectl if not installed
-      apt:
-        name: kubectl
-        state: present
-      when: kubectl_installed.rc != 0
-
-    - name: Apply backend deployment
-      shell: kubectl apply -f ../kubernetes-config/deployment.yaml
-      register: apply_result
-
-    - name: Display apply result
-      debug:
-        msg: "Deployment result: {{ apply_result.stdout }}"
-
-    - name: Fail if apply failed
-      fail:
-        msg: "Applying backend deployment failed"
-      when: apply_result.rc != 0
+  
+  - name: Apply  deployment
+    k8s:
+      state: present
+      kubeconfig: /home/ayushi/.kube/config 
+      definition: "{{ lookup('file', '../kubernetes-config/deployment.yaml') }}"
+      namespace: minikube
