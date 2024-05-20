@@ -62,8 +62,10 @@ pipeline {
                     // Ensure Minikube is running
                     sh 'minikube delete && minikube start'
 
-                    // Run the Ansible playbook
-                    sh "ansible-playbook -i ${INVENTORY_FILE} ${ANSIBLE_PLAYBOOK}"
+                    ansiblePlaybook{
+                         playbook:'deploy_to_minikube.yml'
+                         inventory:'inventory'
+                    } 
                 }
             }
         }
