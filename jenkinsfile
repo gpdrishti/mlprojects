@@ -6,6 +6,8 @@ pipeline {
         ANSIBLE_PLAYBOOK = 'deploy_to_minikube.yml'
         INVENTORY_FILE = 'inventory' // Path to your inventory file
         DOCKER_TAG = 'latest' // You can change this to another tag if needed
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+        MINIKUBE_HOME = '/var/lib/jenkins/.minikube'
     }
 
     stages {
@@ -56,16 +58,17 @@ pipeline {
             steps {
                 script {
                     // Ensure Minikube permissions are correct
-                    sh 'sudo chown -R $USER /home/drishti/.minikube'
-                    sh 'sudo chmod -R u+wrx /home/drishti/.minikube'
+                    sh 'sudo chown -R jenkins:jenkins /var/lib/jenkins/.minikube'
+                    sh 'sudo chmod -R u+wrx /var/lib/jenkins/.minikube'
 
                     // Ensure Minikube is running
-                    sh 'minikube delete && minikube start'
+                    sh 'minikube delete || true'
+                    sh 'minikube start'
 
                     ansiblePlaybook(
-                         playbook:'deploy_to_minikube.yml',
-                         inventory:'inventory'
-                    ) 
+                         playbook: "${ANSIBLE_PLAYBOOK}",
+                         inventory: "${INVENTORY_FILE}"
+                    )
                 }
             }
         }
