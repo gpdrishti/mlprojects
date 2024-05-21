@@ -1,5 +1,28 @@
-name: Deploy to minikube
-hosts: localhost
-tasks:
-  - name: apply deployment
-    shell: kubectl apply -f ../kubernetes-config/deployment.yaml
+---
+- name: Deploy to minikube
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    ansible_python_interpreter: /var/lib/jenkins/workspace/prediction/venv/bin/python
+  collections:
+    - community.kubernetes
+
+  tasks:
+  - name: Create minikube namespace
+    k8s:
+      state: present
+      kubeconfig: /home/drishti/.kube/config
+      definition:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: minikube
+
+  
+  - name: Apply deployment
+    k8s:
+      state: present
+      kubeconfig: /home/drishti/.kube/config 
+      definition: "{{ lookup('file', '../kubernetes-config/deployment.yaml') }}"
+      namespace: minikube
