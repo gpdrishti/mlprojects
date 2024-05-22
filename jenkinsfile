@@ -5,12 +5,14 @@ pipeline {
         DOCKER_IMAGE = 'drishti979/spefinal' // Ensure this is correct
         ANSIBLE_PLAYBOOK = 'deploy_to_minikube.yml'
         INVENTORY_FILE = 'inventory' // Path to your inventory file
+        DOCKER_TAG = 'latest' // You can change this to another tag if needed
+        KUBECONFIG = '/var/lib/jenkins/.minikube/profiles/minikube/config'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/gpdrishti/mlprojects.git'
+                git branch: 'main', url: 'https://github.com/gpdrishti/mlprojects.git'
             }
         }
 
@@ -23,11 +25,30 @@ pipeline {
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${DOCKER_IMAGE}", '.')
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('', 'DockerHubCred') {
+                        sh 'docker tag calculator drishti979/spefinal:latest'
+                        sh 'docker push drishti979/spefinal'
+                    }
+                }
+            }
+        }
+
         stage('Pull Docker Image') {
             steps {
                 script {
                     // Pull the Docker image using Docker commands
-                    sh "docker pull ${DOCKER_IMAGE}"
+                    sh "docker pull ${DOCKER_IMAGE}:${DOCKER_TAG}"
                 }
             }
         }
@@ -35,11 +56,18 @@ pipeline {
         stage('Run Ansible Playbook') {
             steps {
                 script {
-                    // Ensure Minikube is running
-                    sh 'minikube status || minikube start'
+                    // Ensure Minikube permissions are correct
+                    sh 'sudo chown -R jenkins:jenkins /var/lib/jenkins/.minikube'
+                    sh 'sudo chmod -R u+wrx /var/lib/jenkins/.minikube'
 
-                    // Run the Ansible playbook
-                    sh "ansible-playbook -i ${INVENTORY_FILE} ${ANSIBLE_PLAYBOOK}"
+                    // Ensure Minikube is running
+                    sh 'minikube delete || true'
+                    sh 'minikube start'
+
+                    ansiblePlaybook(
+                         playbook: "${ANSIBLE_PLAYBOOK}",
+                         inventory: "${INVENTORY_FILE}"
+                    )
                 }
             }
         }
