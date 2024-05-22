@@ -1,29 +1,39 @@
 ---
-- name: Deploy to minikube
+- name: Deploying BlossomCare on the Kubernetes cluster
   hosts: localhost
-  connection: local
-  become: true
-  become_method: sudo
-  vars:
-    ansible_python_interpreter: /var/lib/jenkins/workspace/prediction/venv/bin/python
-  collections:
-    - community.kubernetes
-
+  remote_user: drishti
+  become: false
   tasks:
-  - name: Create minikube namespace
-    k8s:
-      state: present
-      kubeconfig: /home/drishti/.kube/config
-      definition:
-        apiVersion: v1
-        kind: Namespace
-        metadata:
-          name: minikube
+    - name: Fix permissions on .minikube directory
+      ansible.builtin.shell: |
+        sudo chown -R $USER:$USER $HOME/.minikube
+        sudo chmod -R u+wrx $HOME/.minikube
 
-  
-  - name: Apply deployment
-    k8s:
-      state: present
-      kubeconfig: /home/drishti/.kube/config 
-      definition: "{{ lookup('file', '../kubernetes-config/deployment.yaml') }}"
-      namespace: minikube
+    - name: Start Minikube
+      ansible.builtin.shell: |
+        minikube start
+        
+    - name: Wait for Minikube to start completely
+      ansible.builtin.wait_for_connection:
+      timeout: 600
+      delegate_to: localhost
+
+    - name: Ensure Kubernetes context is set
+      ansible.builtin.shell: |
+        export KUBECONFIG=/var/lib/jenkins/.minikube/profiles/minikube/config
+        kubectl config use-context minikube
+      
+    
+        
+    - name: Deploying  to Kubernetes cluster
+      ansible.builtin.shell: |
+        export KUBECONFIG=/var/lib/jenkins/.minikube/profiles/minikube/config
+        kubectl create namespace my-app || true
+        kubectl config set-context --current --namespace=my-app
+        kubectl apply -f ../manifest/deployment.yaml -n my-app
+      
+    
+    - name: Port forward backend service
+      ansible.builtin.shell: |
+        export KUBECONFIG=/var/lib/jenkins/.minikube/profiles/minikube/config
+        pgrep -f "kubectl port-forward service/backend 8085:8085 -n my-app" || nohup kubectl port-forward service/backend 8085:8085 -n my-app > /dev/null 2>&1 &
