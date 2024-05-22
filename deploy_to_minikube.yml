@@ -28,9 +28,7 @@
     - name: Deploying  to Kubernetes cluster
       ansible.builtin.shell: |
         export KUBECONFIG=/var/lib/jenkins/.minikube/profiles/minikube/config
-        kubectl create namespace my-app || true
-        kubectl config set-context --current --namespace=my-app
-        kubectl apply -f ../deployment.yaml -n my-app
+        kubectl apply -f deployment.yaml 
       
     
     
