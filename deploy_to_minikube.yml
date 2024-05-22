@@ -1,8 +1,8 @@
 ---
-- name: Deploying BlossomCare on the Kubernetes cluster
+- name: Deploying  on the Kubernetes 
   hosts: localhost
   remote_user: drishti
-  become: false
+  become: true
   tasks:
     - name: Fix permissions on .minikube directory
       ansible.builtin.shell: |
