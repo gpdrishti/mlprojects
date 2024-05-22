@@ -6,8 +6,8 @@
   tasks:
     - name: Fix permissions on .minikube directory
       ansible.builtin.shell: |
-        sudo chown -R $USER:$USER $HOME/.minikube
-        sudo chmod -R u+wrx $HOME/.minikube
+        sudo chown -R $USER:$USER /home/drishti/.minikube
+        sudo chmod -R u+wrx /home/drishti/.minikube
 
     - name: Start Minikube
       ansible.builtin.shell: |
