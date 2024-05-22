@@ -30,10 +30,7 @@
         export KUBECONFIG=/var/lib/jenkins/.minikube/profiles/minikube/config
         kubectl create namespace my-app || true
         kubectl config set-context --current --namespace=my-app
-        kubectl apply -f ../manifest/deployment.yaml -n my-app
+        kubectl apply -f ../deployment.yaml -n my-app
       
     
-    - name: Port forward backend service
-      ansible.builtin.shell: |
-        export KUBECONFIG=/var/lib/jenkins/.minikube/profiles/minikube/config
-        pgrep -f "kubectl port-forward service/backend 8085:8085 -n my-app" || nohup kubectl port-forward service/backend 8085:8085 -n my-app > /dev/null 2>&1 &
+    
