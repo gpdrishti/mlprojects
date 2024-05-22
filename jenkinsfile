@@ -6,8 +6,7 @@ pipeline {
         ANSIBLE_PLAYBOOK = 'deploy_to_minikube.yml'
         INVENTORY_FILE = 'inventory' // Path to your inventory file
         DOCKER_TAG = 'latest' // You can change this to another tag if needed
-        KUBECONFIG = '/var/lib/jenkins/.kube/config'
-        MINIKUBE_HOME = '/var/lib/jenkins/.minikube'
+        KUBECONFIG = '/var/lib/jenkins/.minikube/profiles/minikube/config'
     }
 
     stages {
