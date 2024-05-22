@@ -6,9 +6,9 @@ spec:
   selector:
     app: spefinal-app
   ports:
-  - protocol: "TCP"
-    port: 80
-    targetPort: 5000
+    - protocol: "TCP"
+      port: 80
+      targetPort: 5000
   type: LoadBalancer
 
 ---
@@ -27,7 +27,7 @@ spec:
         app: spefinal-app
     spec:
       containers:
-      - name: spefinal-container
-        image: drishti979/spefinal:latest  # Ensure this matches the tag you pushed
-        ports:
-        - containerPort: 5000
+        - name: spefinal-container
+          image: drishti979/spefinal:latest
+          ports:
+            - containerPort: 5000
