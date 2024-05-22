@@ -1,34 +1,34 @@
 ---
-- name: Deploying  on the Kubernetes 
+- name: Deploying on the Kubernetes
   hosts: localhost
   remote_user: drishti
-  become: true
   tasks:
     - name: Fix permissions on .minikube directory
       ansible.builtin.shell: |
-        sudo chown -R $USER:$USER /home/drishti/.minikube
+        sudo chown -R drishti:drishti /home/drishti/.minikube
         sudo chmod -R u+wrx /home/drishti/.minikube
+      become: true
 
     - name: Start Minikube
-      ansible.builtin.shell: |
-        minikube start
-        
+      ansible.builtin.shell: minikube start
+      become: false
+
     - name: Wait for Minikube to start completely
       ansible.builtin.wait_for_connection:
-      timeout: 600
+        timeout: 600
       delegate_to: localhost
 
     - name: Ensure Kubernetes context is set
       ansible.builtin.shell: |
-        export KUBECONFIG=/var/lib/jenkins/.minikube/profiles/minikube/config
+        export KUBECONFIG=/home/drishti/.minikube/profiles/minikube/config
         kubectl config use-context minikube
-      
-    
-        
-    - name: Deploying  to Kubernetes cluster
+      become: false
+      environment:
+        KUBECONFIG: /home/drishti/.minikube/profiles/minikube/config
+
+    - name: Deploying to Kubernetes cluster
       ansible.builtin.shell: |
-        export KUBECONFIG=/var/lib/jenkins/.minikube/profiles/minikube/config
         kubectl apply -f deployment.yaml 
-      
-    
-    
+      become: false
+      environment:
+        KUBECONFIG: /home/drishti/.minikube/profiles/minikube/config
